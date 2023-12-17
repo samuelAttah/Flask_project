@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#">
+    <title>Document</title>
+</head>
+<body>
+    <h1>What is your Name</h1>
+
+    
+    <p>My Name is {{ my_name|upper }}</p>
+
+    <h1>What is your Age</h1>
+    <p>My Age is {{my_age}}</p>
+
+    <h3><b>CLASS LIST</b></h3>
+    <ul>
+        <li>daniel</li>
+        <li>david</li>
+        <li>kingswill</li>
+        <li>russel</li>
+        <li>russel</li>
+        <li>russel</li>
+    </ul>
+
+    <h3><b>CLASS LIST WITH MACROS</b></h3>
+
+    {% import 'macros.html' as macros %}
+    <ul>
+        {% for name in my_list %}
+            {{ macros.render_name(name) }}
+        {% endfor %}
+    </ul>
+   
+   
+
+    
+    
+</body>
+</html>
