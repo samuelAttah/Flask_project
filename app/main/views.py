@@ -2,6 +2,7 @@ from app.main import bp
 from flask import render_template
 from app import db
 from ..models import Item
+from .forms import RegisterForm
 
 
 @bp.route('/')
@@ -26,3 +27,9 @@ def market_route():
     # ]
     items = db.session.execute(db.select(Item).order_by(Item.id)).scalars()
     return render_template('market.html', items=items)
+
+
+@bp.route('/register')
+def register_route():
+    form = RegisterForm()
+    return render_template('register.html', form=form)

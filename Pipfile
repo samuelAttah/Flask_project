@@ -9,6 +9,7 @@ apscheduler = "*"
 flask-sqlalchemy = "*"
 flask-wtf = "*"
 flask-migrate = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

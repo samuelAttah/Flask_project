@@ -11,7 +11,7 @@ class User(db.Model):
         String(length=50), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(
         String(length=65), nullable=False)
-    budget: Mapped[int] = mapped_column(Integer(length=65), nullable=False)
+    budget: Mapped[int] = mapped_column(Integer, nullable=False, default=1000)
     items = db.relationship('Item', backref="owned_user", lazy=True)
 
 
@@ -24,7 +24,8 @@ class Item(db.Model):
         String(length=12), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(
         String(length=1024), nullable=False, unique=True)
-    owner: Mapped[int] = mapped_column(Integer, ForeignKey('user.id',))
+    owner: Mapped[int] = mapped_column(
+        Integer, ForeignKey('user.id'), default=1)
 
     def __repr__(self) -> str:
         return f"item {self.name}"

@@ -1,4 +1,4 @@
 from flask import Blueprint
 
 bp = Blueprint('main', __name__)
-from app.main import views, errors  # nopep8
+from app.main import views, errors, forms  # nopep8

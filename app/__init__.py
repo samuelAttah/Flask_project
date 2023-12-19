@@ -2,6 +2,7 @@ from flask import Flask
 from config import DevelopmentConfig
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from flask_migrate import Migrate
 
 
 class Base(DeclarativeBase):
@@ -9,6 +10,7 @@ class Base(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=Base)
+migrate = Migrate(db)
 
 
 def create_app(config_class=DevelopmentConfig):
@@ -17,8 +19,10 @@ def create_app(config_class=DevelopmentConfig):
 
     # Initialize Flask extensions here
     db.init_app(app)
+    migrate.init_app(app, db)
 
     with app.app_context():
+        db.drop_all()
         db.create_all()
 
     # Register blueprints here
