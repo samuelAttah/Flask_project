@@ -1,10 +1,10 @@
 from app.main import bp
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request
 from app import db
 from ..models import Item, User
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, PurchaseItemForm, SellItemForm
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 
 
 @bp.route('/')
@@ -20,7 +20,7 @@ def home_route():
     return render_template('home.html')
 
 
-@bp.route('/market')
+@bp.route('/market', methods=['GET', 'POST'])
 @login_required
 def market_route():
     # items = [
@@ -28,8 +28,44 @@ def market_route():
     #     {'id': 2, 'name': 'Laptop', 'barcode': '123985473165', 'price': 900},
     #     {'id': 3, 'name': 'Keyboard', 'barcode': '231985128446', 'price': 150}
     # ]
-    items = db.session.execute(db.select(Item).order_by(Item.id)).scalars()
-    return render_template('market.html', items=items)
+    purchase_form = PurchaseItemForm()
+    sell_form = SellItemForm()
+
+    if request.method == "POST":
+        # Purchase Item Logic
+        purchased_item = request.form.get('purchased_item')
+        purchased_item_object = Item.query.filter_by(
+            name=purchased_item).first()
+        if purchased_item_object:
+            if current_user.can_purchase(purchased_item_object):
+                purchased_item_object.owner = current_user.id
+                current_user.budget -= purchased_item_object.price
+                db.session.commit()
+                flash(
+                    f"COngratulations! You purchased {purchased_item_object.name} for {purchased_item_object.price} ", category="success")
+            else:
+                flash(
+                    f"Unfortunately, you don't have enough money to purchase {purchased_item_object.name}", category="danger")
+        # Sell Item Logic
+        sold_item = request.form.get('sold_item')
+        sold_item_object = Item.query.filter_by(name=sold_item).first()
+        if sold_item_object:
+            if current_user.can_sell(sold_item_object):
+                sold_item_object.owner = None
+                current_user.budget += sold_item_object.price
+                db.session.commit()
+                flash(
+                    f"COngratulations! You sold {sold_item_object.name} for {sold_item_object.price} ", category="success")
+            else:
+                flash(
+                    f"Unfortunately, something went wrong with selling {sold_item_object.name}", category="danger")
+        return redirect(url_for('main.market_route'))
+
+    if request.method == "GET":
+        # items = db.session.execute(db.select(Item).order_by(Item.id)).scalars()
+        items = Item.query.filter_by(owner=None)
+        user_items = Item.query.filter_by(owner=current_user.id)
+        return render_template('market.html', items=items, purchase_form=purchase_form, sell_form=sell_form, user_items=user_items)
 
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -40,7 +76,10 @@ def register_route():
                         email_address=form.email_address.data, password=form.password1.data)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('main.login_route'))
+        login_user(user=new_user)
+        flash(
+            f"Account created successfully!, You are now logged in as {new_user.username}", category='success')
+        return redirect(url_for('main.market_route'))
     if len(form.errors) != 0:
         # print(f" type of errors {type(form.errors)}")
         for key, err in form.errors.items():

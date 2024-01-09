@@ -16,6 +16,10 @@ class User(UserMixin, db.Model):
     items = db.relationship('Item', backref="owned_user", lazy=True)
 
     @property
+    def prettier_budget(self):
+        return f"{self.budget:,.0f}$"
+
+    @property
     def password(self):
         raise AttributeError("Password is not a readable Attribute")
 
@@ -27,6 +31,13 @@ class User(UserMixin, db.Model):
     def verify_password(self, plain_password):
         """returns a boolean"""
         return bcrypt.check_password_hash(self.password_hash, plain_password)
+
+    def can_purchase(self, item_obj):
+        """returns a boolean"""
+        return self.budget >= item_obj.price
+
+    def can_sell(self, item_obj):
+        return item_obj in self.items
 
 
 # Flask-Login's Callback function to load user given the user's ID
@@ -46,8 +57,7 @@ class Item(db.Model):
         String(length=12), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(
         String(length=1024), nullable=False, unique=True)
-    owner: Mapped[int] = mapped_column(
-        Integer, ForeignKey('user.id'), default=1)
+    owner = mapped_column(ForeignKey('user.id'), nullable=True)
 
     def __repr__(self):
         class_name = type(self).__name__

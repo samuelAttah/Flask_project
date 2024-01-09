@@ -17,6 +17,7 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'main.login_route'
+login_manager.login_message_category = "info"
 
 
 def create_app(config_class=DevelopmentConfig):
@@ -30,7 +31,7 @@ def create_app(config_class=DevelopmentConfig):
     login_manager.init_app(app)
 
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
 
     # Register blueprints here

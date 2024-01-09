@@ -34,3 +34,11 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField(label="Keep me logged in", default=False)
 
     submit = SubmitField('Sign In')
+
+
+class PurchaseItemForm(FlaskForm):
+    submit = SubmitField(label='Purchase Item')
+
+
+class SellItemForm(FlaskForm):
+    submit = SubmitField(label='Sell Item')
